@@ -16,11 +16,15 @@ def _build_relay_prompt(question: str, context: dict) -> str:
 
 
 def _run_relay_command(command: list[str], prompt: str) -> str:
-    result = subprocess.run(
-        [*command, prompt],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            [*command, prompt],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"relay provider timeout: {' '.join(command)}") from exc
     if result.returncode != 0:
         error = (result.stderr or result.stdout).strip()
         raise RuntimeError(error or "relay provider execution failed")

@@ -47,3 +47,15 @@ def test_generate_answer_auto_uses_claude_when_codex_missing(monkeypatch) -> Non
 
     text = generate_answer("question", {"k": "v"}, provider="auto")
     assert text == "claude-output"
+
+
+def test_generate_answer_auto_falls_back_to_api_when_no_cli(monkeypatch) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    def fake_which(name: str) -> str | None:
+        return None
+
+    monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
+
+    text = generate_answer("question", {"k": "v"}, provider="auto")
+    assert "API key not configured" in text

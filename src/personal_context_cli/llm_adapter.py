@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def _build_relay_prompt(question: str, context: dict) -> str:
@@ -104,34 +105,41 @@ def generate_answer(
     retries = max(0, relay_retries)
 
     if provider == "auto":
-        relay_failures: list[str] = []
-
+        available: list[tuple[str, list[str]]] = []
         if shutil.which("codex"):
-            try:
-                return _run_relay_command(
-                    ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only"],
+            available.append(("codex", ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only"]))
+        if shutil.which("claude") and not os.environ.get("CLAUDECODE"):
+            available.append(("claude", ["claude", "-p"]))
+
+        if not available:
+            return _generate_host_auth_guidance(context)
+
+        with ThreadPoolExecutor(max_workers=len(available)) as executor:
+            futures = {
+                executor.submit(
+                    _run_relay_command,
+                    cmd,
                     prompt,
                     timeout_seconds=timeout_seconds,
                     retries=retries,
-                )
-            except RuntimeError as exc:
-                relay_failures.append(f"codex: {_classify_provider_error(str(exc))}")
-        if shutil.which("claude"):
-            try:
-                return _run_relay_command(
-                    ["claude", "-p"],
-                    prompt,
-                    timeout_seconds=timeout_seconds,
-                    retries=retries,
-                )
-            except RuntimeError as exc:
-                relay_failures.append(f"claude: {_classify_provider_error(str(exc))}")
+                ): name
+                for name, cmd in available
+            }
+            relay_failures: list[str] = []
+            for future in as_completed(futures):
+                name = futures[future]
+                try:
+                    result = future.result()
+                    # Cancel remaining futures on first success
+                    for f in futures:
+                        f.cancel()
+                    return result
+                except RuntimeError as exc:
+                    relay_failures.append(f"{name}: {_classify_provider_error(str(exc))}")
 
         fallback = _generate_host_auth_guidance(context)
-        if relay_failures:
-            details = "; ".join(relay_failures)
-            return f"Relay providers unavailable ({details}). {fallback}"
-        return fallback
+        details = "; ".join(relay_failures)
+        return f"Relay providers unavailable ({details}). {fallback}"
 
     if provider == "codex":
         return _run_relay_command(

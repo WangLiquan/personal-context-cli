@@ -1,10 +1,12 @@
 import base64
+import functools
 import json
 from hashlib import scrypt
 
 from cryptography.fernet import Fernet
 
 
+@functools.lru_cache(maxsize=4)
 def _derive_key(password: str, salt: bytes) -> bytes:
     key = scrypt(
         password=password.encode("utf-8"),

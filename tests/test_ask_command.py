@@ -45,6 +45,7 @@ def test_generate_answer_auto_uses_claude_when_codex_missing(monkeypatch) -> Non
 
     monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
     monkeypatch.setattr("personal_context_cli.llm_adapter.subprocess.run", fake_run)
+    monkeypatch.delenv("CLAUDECODE", raising=False)
 
     text = generate_answer("question", {"k": "v"}, provider="auto")
     assert text == "claude-output"
@@ -108,6 +109,7 @@ def test_generate_answer_auto_reports_provider_failures(monkeypatch) -> None:
 
     monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
     monkeypatch.setattr("personal_context_cli.llm_adapter.subprocess.run", fake_run)
+    monkeypatch.delenv("CLAUDECODE", raising=False)
 
     text = generate_answer(
         "question",
@@ -120,3 +122,60 @@ def test_generate_answer_auto_reports_provider_failures(monkeypatch) -> None:
     assert "codex: network_unreachable" in text
     assert "claude: auth_required" in text
     assert "API key" not in text
+
+
+def test_generate_answer_auto_skips_claude_in_claudecode_env(monkeypatch) -> None:
+    """When CLAUDECODE env var is set, claude provider should be skipped."""
+    providers_called: list[str] = []
+
+    def fake_which(name: str) -> str | None:
+        if name in {"codex", "claude"}:
+            return f"/usr/bin/{name}"
+        return None
+
+    def fake_run(*args, **kwargs):  # type: ignore[no-untyped-def]
+        providers_called.append(args[0][0])
+        return subprocess.CompletedProcess(args=args[0], returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
+    monkeypatch.setattr("personal_context_cli.llm_adapter.subprocess.run", fake_run)
+    monkeypatch.setenv("CLAUDECODE", "1")
+
+    text = generate_answer("question", {"k": "v"}, provider="auto")
+    assert text == "ok"
+    assert "claude" not in providers_called
+    assert "codex" in providers_called
+
+
+def test_generate_answer_auto_skips_claude_only_provider_in_claudecode(monkeypatch) -> None:
+    """When only claude is available but CLAUDECODE is set, fall back to guidance."""
+    def fake_which(name: str) -> str | None:
+        if name == "claude":
+            return "/usr/bin/claude"
+        return None
+
+    monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
+    monkeypatch.setenv("CLAUDECODE", "1")
+
+    text = generate_answer("question", {"k": "v"}, provider="auto")
+    assert "No relay provider available" in text
+
+
+def test_generate_answer_auto_parallel_first_success_wins(monkeypatch) -> None:
+    """When both providers are available, first successful result wins."""
+    def fake_which(name: str) -> str | None:
+        if name in {"codex", "claude"}:
+            return f"/usr/bin/{name}"
+        return None
+
+    def fake_run(*args, **kwargs):  # type: ignore[no-untyped-def]
+        if args[0][0] == "codex":
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout="codex-wins", stderr="")
+        return subprocess.CompletedProcess(args=args[0], returncode=0, stdout="claude-wins", stderr="")
+
+    monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
+    monkeypatch.setattr("personal_context_cli.llm_adapter.subprocess.run", fake_run)
+    monkeypatch.delenv("CLAUDECODE", raising=False)
+
+    text = generate_answer("question", {"k": "v"}, provider="auto")
+    assert text in ("codex-wins", "claude-wins")

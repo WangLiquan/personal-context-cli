@@ -71,6 +71,13 @@ def test_readme_documents_keychain_password_setup() -> None:
     assert "security find-generic-password" in content
 
 
+def test_chinese_readme_exists_and_documents_keychain_password_setup() -> None:
+    content = Path("README.zh-CN.md").read_text(encoding="utf-8")
+    assert "security add-generic-password" in content
+    assert "security find-generic-password" in content
+    assert "personal-context-reinit" in content
+
+
 def test_init_skill_requests_password_first() -> None:
     content = Path("skills/personal-context-init-profile/SKILL.md").read_text(encoding="utf-8")
     assert "Ask the user for a password before running any init/profile command." in content

@@ -1,5 +1,7 @@
 # Init and Profile Recipes
 
+When guiding users through init, always request a custom password input and do not provide a default-password choice.
+
 ## Session Password
 
 ```bash

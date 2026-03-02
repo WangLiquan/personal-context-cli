@@ -1,4 +1,4 @@
 version: 1
 display_name: Personal Context Init Profile
 short_description: Initialize encrypted store and maintain profile or family records.
-default_prompt: Use the init-profile skill to initialize encrypted storage and manage owner profile, preferences, and family records.
+default_prompt: Use the init-profile skill to initialize encrypted storage and manage owner profile, preferences, and family records. Never offer a default password option; ask the user to provide a custom password.

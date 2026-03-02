@@ -10,6 +10,8 @@ description: Use when initializing encrypted personal context storage or updatin
 Use this skill for onboarding and profile maintenance.
 All commands use the installed `personal-context` CLI directly.
 Ask the user for a password before running any init/profile command.
+Do not offer a default password option.
+Require the user to input a custom password directly.
 
 ## One-Time Install
 

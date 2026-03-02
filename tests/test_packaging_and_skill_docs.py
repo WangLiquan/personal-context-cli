@@ -83,6 +83,13 @@ def test_init_skill_requests_password_first() -> None:
     assert "Ask the user for a password before running any init/profile command." in content
 
 
+def test_init_skill_disallows_default_password_option() -> None:
+    skill_content = Path("skills/personal-context-init-profile/SKILL.md").read_text(encoding="utf-8")
+    prompt_content = Path("skills/personal-context-init-profile/agents/openai.yaml").read_text(encoding="utf-8")
+    assert "Do not offer a default password option." in skill_content
+    assert "Never offer a default password option" in prompt_content
+
+
 def test_reinit_skill_defines_full_reset_workflow() -> None:
     content = Path("skills/personal-context-reinit/SKILL.md").read_text(encoding="utf-8")
     assert "clear all existing personal-context settings" in content.lower()

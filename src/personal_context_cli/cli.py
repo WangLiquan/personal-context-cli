@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -110,6 +111,68 @@ def _append_context_note(payload: dict, question: str, question_type: str, note:
     )
     payload["context_notes"] = notes
     return payload
+
+
+def _append_ask_history(payload: dict, question: str, question_type: str) -> dict:
+    history = payload.get("ask_history", [])
+    if not isinstance(history, list):
+        history = []
+    history.append(
+        {
+            "question": question,
+            "question_type": question_type,
+        }
+    )
+    payload["ask_history"] = history[-200:]
+    return payload
+
+
+def _extract_fact_memory_entries(text: str, question_type: str) -> list[dict]:
+    entries: list[dict] = []
+
+    mortgage_match = re.search(r"房贷\s*([0-9]+(?:\.[0-9]+)?)\s*(w|万|k|千|元|块)?", text, flags=re.IGNORECASE)
+    if mortgage_match:
+        amount = mortgage_match.group(1)
+        unit = mortgage_match.group(2) or "元"
+        entries.append({"fact": f"房贷每月约{amount}{unit}", "question_type": "finance"})
+
+    income_match = re.search(r"月收入\s*([0-9]+(?:\.[0-9]+)?)\s*(w|万|k|千|元)?", text, flags=re.IGNORECASE)
+    if income_match:
+        amount = income_match.group(1)
+        unit = income_match.group(2) or "元"
+        entries.append({"fact": f"月收入约{amount}{unit}", "question_type": "finance"})
+
+    risk_match = re.search(r"风险偏好\s*(保守|中等|稳健|激进)", text)
+    if risk_match:
+        entries.append({"fact": f"风险偏好{risk_match.group(1)}", "question_type": "finance"})
+
+    return entries[:3]
+
+
+def _merge_fact_memory(payload: dict, entries: list[dict]) -> tuple[dict, bool]:
+    owner = dict(payload.get("owner_profile", {}))
+    fact_memory = owner.get("fact_memory", [])
+    if not isinstance(fact_memory, list):
+        fact_memory = []
+
+    seen = {
+        (item.get("fact"), item.get("question_type"))
+        for item in fact_memory
+        if isinstance(item, dict)
+    }
+    changed = False
+    for item in entries:
+        key = (item.get("fact"), item.get("question_type"))
+        if key in seen:
+            continue
+        seen.add(key)
+        fact_memory.append(item)
+        changed = True
+
+    if changed:
+        owner["fact_memory"] = fact_memory[-100:]
+        payload["owner_profile"] = owner
+    return payload, changed
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -280,13 +343,33 @@ def main() -> int:
         store = EncryptedStore(Path(args.data_file))
         payload = store.load(password)
         resolved_type = detect_question_type(args.question, args.type)
+        payload_changed = False
+
+        question_text = args.question.strip()
+        if question_text:
+            payload = _append_ask_history(payload, question_text, resolved_type)
+            payload_changed = True
+            payload, fact_changed = _merge_fact_memory(
+                payload,
+                _extract_fact_memory_entries(question_text, resolved_type),
+            )
+            payload_changed = payload_changed or fact_changed
+
         context_gaps = find_context_gaps(args.question, args.type, payload)
 
         if context_gaps and sys.stdin.isatty():
             note = input(_build_follow_up_prompt(resolved_type, context_gaps)).strip()
             if note:
                 payload = _append_context_note(payload, args.question, resolved_type, note)
-                store.save(payload, password)
+                payload_changed = True
+                payload, fact_changed = _merge_fact_memory(
+                    payload,
+                    _extract_fact_memory_entries(note, resolved_type),
+                )
+                payload_changed = payload_changed or fact_changed
+
+        if payload_changed:
+            store.save(payload, password)
 
         context = select_context(args.question, args.type, payload)
         answer = generate_answer(

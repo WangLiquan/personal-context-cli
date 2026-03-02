@@ -38,6 +38,21 @@ def _select_relevant_notes(payload: dict, resolved_type: str) -> list[dict]:
         item_type = item.get("question_type")
         if item_type in (None, "", "other", resolved_type):
             filtered.append(item)
+    return filtered[-3:]
+
+
+def _select_relevant_fact_memory(owner: dict, resolved_type: str) -> list[dict]:
+    items = owner.get("fact_memory", [])
+    if not isinstance(items, list):
+        return []
+
+    filtered = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        item_type = item.get("question_type")
+        if item_type in (None, "", "other", resolved_type):
+            filtered.append(item)
     return filtered[-5:]
 
 
@@ -46,8 +61,9 @@ def find_context_gaps(question: str, question_type: str | None, payload: dict) -
     owner = payload.get("owner_profile", {})
     family_members = payload.get("family_members", [])
     notes = _select_relevant_notes(payload, resolved_type)
+    fact_memory = _select_relevant_fact_memory(owner, resolved_type)
 
-    if notes:
+    if notes or fact_memory:
         return []
 
     if resolved_type == "finance":
@@ -73,6 +89,7 @@ def select_context(question: str, question_type: str | None, payload: dict) -> d
     resolved_type = detect_question_type(question, question_type)
     owner = payload.get("owner_profile", {})
     notes = _select_relevant_notes(payload, resolved_type)
+    fact_memory = _select_relevant_fact_memory(owner, resolved_type)
 
     if resolved_type == "finance":
         return {
@@ -81,6 +98,7 @@ def select_context(question: str, question_type: str | None, payload: dict) -> d
                     "income_range": owner.get("income_range"),
                     "risk_preference": owner.get("risk_preference"),
                     "goals": owner.get("goals"),
+                    "fact_memory": fact_memory,
                 }
             ),
             "preferences": payload.get("preferences", {}),
@@ -89,7 +107,10 @@ def select_context(question: str, question_type: str | None, payload: dict) -> d
         }
 
     return {
-        "owner_profile": owner,
+        "owner_profile": {
+            **owner,
+            "fact_memory": fact_memory,
+        },
         "preferences": payload.get("preferences", {}),
         "family_members": payload.get("family_members", []),
         "context_notes": notes,

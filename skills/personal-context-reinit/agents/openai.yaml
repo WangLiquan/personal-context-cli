@@ -1,0 +1,4 @@
+version: 1
+display_name: Personal Context Reinit
+short_description: Reset encrypted personal-context data to a clean state.
+default_prompt: Use the personal-context reinit workflow to confirm destructive reset, run one-step data reset, and guide the user to reconfigure profile data.

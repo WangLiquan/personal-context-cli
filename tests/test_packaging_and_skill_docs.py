@@ -21,6 +21,7 @@ def test_skill_docs_use_direct_cli_without_wrapper_script() -> None:
         Path("skills/personal-context-cli-workflow/SKILL.md"),
         Path("skills/personal-context-init-profile/SKILL.md"),
         Path("skills/personal-context-ask-flow/SKILL.md"),
+        Path("skills/personal-context-reinit/SKILL.md"),
     ]
 
     for doc in skill_docs:
@@ -56,6 +57,7 @@ def test_skill_docs_recommend_session_password_env() -> None:
         Path("skills/personal-context-cli-workflow/SKILL.md"),
         Path("skills/personal-context-init-profile/SKILL.md"),
         Path("skills/personal-context-ask-flow/SKILL.md"),
+        Path("skills/personal-context-reinit/SKILL.md"),
     ]
     for doc in skill_docs:
         content = doc.read_text(encoding="utf-8")
@@ -72,3 +74,10 @@ def test_readme_documents_keychain_password_setup() -> None:
 def test_init_skill_requests_password_first() -> None:
     content = Path("skills/personal-context-init-profile/SKILL.md").read_text(encoding="utf-8")
     assert "Ask the user for a password before running any init/profile command." in content
+
+
+def test_reinit_skill_defines_full_reset_workflow() -> None:
+    content = Path("skills/personal-context-reinit/SKILL.md").read_text(encoding="utf-8")
+    assert "clear all existing personal-context settings" in content.lower()
+    assert "personal-context init" in content
+    assert "reconfigure profile, preferences, and family data" in content.lower()

@@ -22,6 +22,7 @@ Then call skills by name directly in OpenX/Claude Code:
 - `personal-context-cli-workflow`
 - `personal-context-init-profile`
 - `personal-context-ask-flow`
+- `personal-context-reinit`
 
 ## Password Setup (recommended)
 

@@ -100,8 +100,8 @@ from personal_context_cli.crypto import decrypt_payload, encrypt_payload
 
 def test_encrypt_decrypt_roundtrip():
     payload = {"owner_profile": {"industry": "tech"}}
-    token = encrypt_payload(payload, "pass123")
-    restored = decrypt_payload(token, "pass123")
+    token = encrypt_payload(payload, "<YOUR_PASSWORD>")
+    restored = decrypt_payload(token, "<YOUR_PASSWORD>")
     assert restored == payload
 ```
 
@@ -166,7 +166,7 @@ from personal_context_cli.store import EncryptedStore
 
 def test_store_writes_encrypted_file_only(tmp_path: Path):
     store = EncryptedStore(tmp_path / "profile.enc")
-    store.save({"owner_profile": {"age": 30}}, "pass123")
+    store.save({"owner_profile": {"age": 30}}, "<YOUR_PASSWORD>")
     assert (tmp_path / "profile.enc").exists()
     assert not (tmp_path / "profile.json").exists()
 ```
@@ -278,7 +278,7 @@ def test_init_creates_encrypted_store(tmp_path: Path):
         [
             sys.executable, "-m", "personal_context_cli", "init",
             "--data-file", str(tmp_path / "profile.enc"),
-            "--password", "pass123"
+            "--password", "<YOUR_PASSWORD>"
         ],
         capture_output=True,
         text=True,
@@ -333,19 +333,19 @@ import sys
 def test_profile_set_and_get_roundtrip(tmp_path):
     data_file = tmp_path / "profile.enc"
     subprocess.run(
-        [sys.executable, "-m", "personal_context_cli", "init", "--data-file", str(data_file), "--password", "pass123"],
+        [sys.executable, "-m", "personal_context_cli", "init", "--data-file", str(data_file), "--password", "<YOUR_PASSWORD>"],
         check=True,
     )
     set_result = subprocess.run(
         [
             sys.executable, "-m", "personal_context_cli", "profile", "set",
-            "--data-file", str(data_file), "--password", "pass123",
+            "--data-file", str(data_file), "--password", "<YOUR_PASSWORD>",
             "--age", "32", "--industry", "internet", "--income-range", "50-100w"
         ],
         capture_output=True, text=True
     )
     get_result = subprocess.run(
-        [sys.executable, "-m", "personal_context_cli", "profile", "get", "--data-file", str(data_file), "--password", "pass123"],
+        [sys.executable, "-m", "personal_context_cli", "profile", "get", "--data-file", str(data_file), "--password", "<YOUR_PASSWORD>"],
         capture_output=True, text=True
     )
     assert set_result.returncode == 0

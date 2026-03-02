@@ -78,7 +78,7 @@ personal-context family list \
 ## Verification
 
 ```bash
-cd /Users/wangliquan/Desktop/personal-context-cli
+cd $PROJECT_ROOT
 PYTHONPATH=src .venv/bin/pytest -v
 ```
 

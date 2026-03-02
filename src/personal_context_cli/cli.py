@@ -91,7 +91,6 @@ def build_parser() -> argparse.ArgumentParser:
 
     ask_parser = subcommands.add_parser("ask")
     ask_parser.add_argument("question")
-    ask_parser.add_argument("--type")
     ask_parser.add_argument(
         "--provider",
         choices=["auto", "codex", "claude"],
@@ -248,7 +247,7 @@ def main() -> int:
             return 0
     if args.command == "ask":
         payload = EncryptedStore(Path(args.data_file)).load(password)
-        context = select_context(args.question, args.type, payload)
+        context = select_context(args.question, None, payload)
         answer = generate_answer(
             args.question,
             context,

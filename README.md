@@ -68,7 +68,6 @@ personal-context ask \
   --provider auto \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --type finance \
   --data-file ./profile.enc
 ```
 

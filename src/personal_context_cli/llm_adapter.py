@@ -108,7 +108,7 @@ def generate_answer(
         available: list[tuple[str, list[str]]] = []
         if shutil.which("codex"):
             available.append(("codex", ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only"]))
-        if shutil.which("claude") and not os.environ.get("CLAUDECODE"):
+        if shutil.which("claude"):
             available.append(("claude", ["claude", "-p"]))
 
         if not available:

@@ -35,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     ask_parser.add_argument("--type")
     ask_parser.add_argument(
         "--provider",
-        choices=["auto", "codex", "claude", "api"],
+        choices=["auto", "codex", "claude"],
         default="auto",
     )
     ask_parser.add_argument(

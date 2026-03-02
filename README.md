@@ -35,10 +35,12 @@ PYTHONPATH=src .venv/bin/python -m personal_context_cli context preview \
   --data-file ./profile.enc \
   --password pass123
 
-# ask with fallback (when no OPENAI_API_KEY)
+# ask with host-auth relay (no project API key needed)
 PYTHONPATH=src .venv/bin/python -m personal_context_cli ask \
   "Should I increase my emergency fund?" \
   --provider auto \
+  --relay-timeout-seconds 8 \
+  --relay-retries 1 \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
@@ -71,4 +73,3 @@ Use the bundled wrapper script to avoid repeating runtime setup:
 `ask` provider modes:
 - `auto` (default): use logged-in `codex`/`claude` CLI credentials
 - `codex` / `claude`: force specific relay provider
-- `api`: use `OPENAI_API_KEY`

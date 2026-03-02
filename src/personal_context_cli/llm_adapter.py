@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import subprocess
 
@@ -49,10 +48,11 @@ def _run_relay_command(
     raise RuntimeError("relay provider execution failed")
 
 
-def _generate_with_api_fallback(context: dict) -> str:
-    if not os.getenv("OPENAI_API_KEY"):
-        return f"API key not configured. Use this context externally: {context}"
-    return "stub-answer"
+def _generate_host_auth_guidance(context: dict) -> str:
+    return (
+        "No relay provider available. Run this command inside OpenX or Claude Code "
+        f"with an active login session. Use this context externally: {context}"
+    )
 
 
 def _classify_provider_error(error_message: str) -> str:
@@ -122,7 +122,7 @@ def generate_answer(
             except RuntimeError as exc:
                 relay_failures.append(f"claude: {_classify_provider_error(str(exc))}")
 
-        fallback = _generate_with_api_fallback(context)
+        fallback = _generate_host_auth_guidance(context)
         if relay_failures:
             details = "; ".join(relay_failures)
             return f"Relay providers unavailable ({details}). {fallback}"
@@ -143,8 +143,5 @@ def generate_answer(
             timeout_seconds=timeout_seconds,
             retries=retries,
         )
-
-    if provider == "api":
-        return _generate_with_api_fallback(context)
 
     raise ValueError(f"Unsupported provider: {provider}")

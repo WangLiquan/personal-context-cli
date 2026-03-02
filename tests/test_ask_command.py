@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import subprocess
 
+import pytest
+
 from personal_context_cli.llm_adapter import generate_answer
 
 
-def test_generate_answer_api_fallback_without_key(monkeypatch) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    text = generate_answer(
-        "How to plan next year?",
-        {"owner_profile": {"income_range": "50-100w"}},
-        provider="api",
-    )
-    assert "API key not configured" in text
+def test_generate_answer_api_provider_is_not_supported() -> None:
+    with pytest.raises(ValueError, match="Unsupported provider: api"):
+        generate_answer(
+            "How to plan next year?",
+            {"owner_profile": {"income_range": "50-100w"}},
+            provider="api",
+        )
 
 
 def test_generate_answer_auto_uses_codex(monkeypatch) -> None:
@@ -49,16 +50,16 @@ def test_generate_answer_auto_uses_claude_when_codex_missing(monkeypatch) -> Non
     assert text == "claude-output"
 
 
-def test_generate_answer_auto_falls_back_to_api_when_no_cli(monkeypatch) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-
+def test_generate_answer_auto_returns_host_auth_guidance_when_no_cli(monkeypatch) -> None:
     def fake_which(name: str) -> str | None:
         return None
 
     monkeypatch.setattr("personal_context_cli.llm_adapter.shutil.which", fake_which)
 
     text = generate_answer("question", {"k": "v"}, provider="auto")
-    assert "API key not configured" in text
+    assert "No relay provider available" in text
+    assert "OpenX or Claude Code" in text
+    assert "API key" not in text
 
 
 def test_generate_answer_codex_retries_on_timeout(monkeypatch) -> None:
@@ -85,8 +86,6 @@ def test_generate_answer_codex_retries_on_timeout(monkeypatch) -> None:
 
 
 def test_generate_answer_auto_reports_provider_failures(monkeypatch) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-
     def fake_which(name: str) -> str | None:
         if name in {"codex", "claude"}:
             return f"/usr/bin/{name}"
@@ -120,3 +119,4 @@ def test_generate_answer_auto_reports_provider_failures(monkeypatch) -> None:
     assert "Relay providers unavailable" in text
     assert "codex: network_unreachable" in text
     assert "claude: auth_required" in text
+    assert "API key" not in text

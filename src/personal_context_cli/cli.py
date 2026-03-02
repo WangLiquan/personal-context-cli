@@ -108,6 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="Retry count for relay timeout failures.",
     )
+    ask_parser.add_argument("--type", default=None, help="Context type filter (e.g. finance, family, career, education).")
     _add_data_password_args(ask_parser)
 
     context_parser = subcommands.add_parser("context")
@@ -247,7 +248,7 @@ def main() -> int:
             return 0
     if args.command == "ask":
         payload = EncryptedStore(Path(args.data_file)).load(password)
-        context = select_context(args.question, None, payload)
+        context = select_context(args.question, args.type, payload)
         answer = generate_answer(
             args.question,
             context,

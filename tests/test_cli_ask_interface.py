@@ -19,16 +19,18 @@ def test_ask_accepts_question_without_type_flag() -> None:
     assert args.question == "hello"
 
 
-def test_ask_rejects_type_flag() -> None:
+def test_ask_accepts_type_flag() -> None:
     parser = build_parser()
-    with pytest.raises(SystemExit):
-        parser.parse_args(
-            [
-                "ask",
-                "hello",
-                "--type",
-                "finance",
-                "--data-file",
-                "profile.enc",
-            ]
-        )
+    args = parser.parse_args(
+        [
+            "ask",
+            "hello",
+            "--type",
+            "finance",
+            "--data-file",
+            "profile.enc",
+        ]
+    )
+    assert args.command == "ask"
+    assert args.question == "hello"
+    assert args.type == "finance"

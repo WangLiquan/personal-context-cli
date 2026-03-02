@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 
@@ -23,6 +24,9 @@ def _run_relay_command(
 ) -> str:
     attempts = max(1, retries + 1)
 
+    env = os.environ.copy()
+    env.pop("CLAUDECODE", None)
+
     for attempt in range(attempts):
         try:
             result = subprocess.run(
@@ -30,6 +34,7 @@ def _run_relay_command(
                 capture_output=True,
                 text=True,
                 timeout=timeout_seconds,
+                env=env,
             )
         except subprocess.TimeoutExpired as exc:
             if attempt == attempts - 1:

@@ -3,7 +3,7 @@
 ## Bootstrap
 
 ```bash
-./skills/personal-context-init-profile/scripts/pctx.sh init \
+personal-context init \
   --data-file ./profile.enc \
   --password pass123
 ```
@@ -11,7 +11,7 @@
 ## Owner Profile
 
 ```bash
-./skills/personal-context-init-profile/scripts/pctx.sh profile set \
+personal-context profile set \
   --data-file ./profile.enc \
   --password pass123 \
   --age 32 \
@@ -22,7 +22,7 @@
 ## Preferences
 
 ```bash
-./skills/personal-context-init-profile/scripts/pctx.sh prefs set \
+personal-context prefs set \
   --data-file ./profile.enc \
   --password pass123 \
   --response-style brief \
@@ -33,12 +33,12 @@
 ## Family CRUD
 
 ```bash
-./skills/personal-context-init-profile/scripts/pctx.sh family add \
+personal-context family add \
   --data-file ./profile.enc \
   --password pass123 \
   --relation spouse
 
-./skills/personal-context-init-profile/scripts/pctx.sh family list \
+personal-context family list \
   --data-file ./profile.enc \
   --password pass123
 ```

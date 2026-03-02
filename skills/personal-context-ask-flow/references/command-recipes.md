@@ -3,7 +3,7 @@
 ## Context Preview
 
 ```bash
-./skills/personal-context-ask-flow/scripts/pctx.sh context preview \
+personal-context context preview \
   "Should I increase my emergency fund?" \
   --type finance \
   --data-file ./profile.enc \
@@ -13,9 +13,11 @@
 ## Ask with Auto Relay
 
 ```bash
-./skills/personal-context-ask-flow/scripts/pctx.sh ask \
+personal-context ask \
   "Should I increase my emergency fund?" \
   --provider auto \
+  --relay-timeout-seconds 45 \
+  --relay-retries 1 \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
@@ -25,14 +27,18 @@
 
 ```bash
 # Force codex relay
-./skills/personal-context-ask-flow/scripts/pctx.sh ask "question" \
+personal-context ask "question" \
   --provider codex \
+  --relay-timeout-seconds 45 \
+  --relay-retries 1 \
   --data-file ./profile.enc \
   --password pass123
 
 # Force claude relay
-./skills/personal-context-ask-flow/scripts/pctx.sh ask "question" \
+personal-context ask "question" \
   --provider claude \
+  --relay-timeout-seconds 45 \
+  --relay-retries 1 \
   --data-file ./profile.enc \
   --password pass123
 ```

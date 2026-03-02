@@ -3,7 +3,7 @@
 ## Basic Setup
 
 ```bash
-./skills/personal-context-cli-workflow/scripts/pctx.sh init \
+personal-context init \
   --data-file ./profile.enc \
   --password pass123
 ```
@@ -15,14 +15,14 @@ Expected:
 ## Profile and Preferences
 
 ```bash
-./skills/personal-context-cli-workflow/scripts/pctx.sh profile set \
+personal-context profile set \
   --data-file ./profile.enc \
   --password pass123 \
   --age 32 \
   --industry internet \
   --income-range 50-100w
 
-./skills/personal-context-cli-workflow/scripts/pctx.sh prefs set \
+personal-context prefs set \
   --data-file ./profile.enc \
   --password pass123 \
   --response-style brief \
@@ -33,12 +33,12 @@ Expected:
 ## Family CRUD
 
 ```bash
-./skills/personal-context-cli-workflow/scripts/pctx.sh family add \
+personal-context family add \
   --data-file ./profile.enc \
   --password pass123 \
   --relation spouse
 
-./skills/personal-context-cli-workflow/scripts/pctx.sh family list \
+personal-context family list \
   --data-file ./profile.enc \
   --password pass123
 ```
@@ -46,19 +46,20 @@ Expected:
 ## Context and Ask
 
 ```bash
-./skills/personal-context-cli-workflow/scripts/pctx.sh context preview \
+personal-context context preview \
   "Should I increase my emergency fund?" \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
 
-./skills/personal-context-cli-workflow/scripts/pctx.sh ask \
+personal-context ask \
   "Should I increase my emergency fund?" \
   --provider auto \
+  --relay-timeout-seconds 45 \
+  --relay-retries 1 \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
 ```
 
 `--provider auto` uses external logged-in CLI credentials from `codex` or `claude`.
-Use `--provider api` only when you want explicit key-based behavior.

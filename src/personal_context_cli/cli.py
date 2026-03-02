@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .config import DEFAULT_PROFILE_PAYLOAD
 from .context_selector import select_context
+from .llm_adapter import generate_answer
 from .services import (
     add_family_member,
     get_owner_profile,
@@ -29,7 +30,10 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser = subcommands.add_parser("init")
     _add_data_password_args(init_parser)
 
-    subcommands.add_parser("ask")
+    ask_parser = subcommands.add_parser("ask")
+    ask_parser.add_argument("question")
+    ask_parser.add_argument("--type")
+    _add_data_password_args(ask_parser)
 
     context_parser = subcommands.add_parser("context")
     context_sub = context_parser.add_subparsers(dest="context_command")
@@ -163,5 +167,11 @@ def main() -> int:
             context = select_context(args.question, args.type, payload)
             print(json.dumps(context, ensure_ascii=False))
             return 0
+    if args.command == "ask":
+        payload = EncryptedStore(Path(args.data_file)).load(args.password)
+        context = select_context(args.question, args.type, payload)
+        answer = generate_answer(args.question, context)
+        print(answer)
+        return 0
 
     return 0

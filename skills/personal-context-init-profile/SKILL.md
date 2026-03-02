@@ -19,15 +19,7 @@ Require the user to input a custom password directly.
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-beta"
 ```
 
-## Password Session (recommended)
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Use one explicit password for this profile and pass it with `--password` in each command.
 
 ## Core Commands
 
@@ -35,7 +27,8 @@ export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-co
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 2) Owner profile
@@ -43,12 +36,14 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --age 32 \
   --industry internet \
   --income-range 50-100w
 
 personal-context profile get \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 3) Preferences
@@ -56,12 +51,14 @@ personal-context profile get \
 ```bash
 personal-context prefs set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
 
 personal-context prefs get \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 4) Family records
@@ -69,12 +66,14 @@ personal-context prefs get \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --relation spouse \
   --age-band 30-39 \
   --occupation-or-school "product manager"
 
 personal-context family list \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Verification

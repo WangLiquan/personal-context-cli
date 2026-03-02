@@ -1,8 +1,7 @@
 import argparse
+import getpass
 import json
-import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -21,16 +20,12 @@ from .services import (
 )
 from .store import EncryptedStore
 
-PASSWORD_ENV_VAR = "PCTX_PASSWORD"
-KEYCHAIN_SERVICE = "personal-context-cli"
-
-
 def _add_data_password_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--data-file", required=True)
     parser.add_argument(
         "--password",
         required=False,
-        help=f"Encryption password. If omitted, uses ${PASSWORD_ENV_VAR}.",
+        help="Encryption password. If omitted in interactive mode, CLI will prompt.",
     )
 
 
@@ -39,48 +34,13 @@ def _resolve_password(args: argparse.Namespace, parser: argparse.ArgumentParser)
     if password:
         return password
 
-    env_password = os.getenv(PASSWORD_ENV_VAR)
-    if env_password:
-        return env_password
+    if sys.stdin.isatty():
+        prompted = getpass.getpass("Enter encryption password: ").strip()
+        if prompted:
+            return prompted
 
-    keychain_password = _read_password_from_keychain()
-    if keychain_password:
-        return keychain_password
-
-    parser.error(
-        f"Password not provided. Use --password, set {PASSWORD_ENV_VAR}, or configure macOS Keychain."
-    )
+    parser.error("Password not provided. Use --password or run in interactive mode.")
     raise RuntimeError("unreachable")
-
-
-def _read_password_from_keychain() -> str | None:
-    if os.getenv("PCTX_DISABLE_KEYCHAIN") == "1":
-        return None
-    if sys.platform != "darwin":
-        return None
-
-    username = os.getenv("USER")
-    if not username:
-        return None
-
-    result = subprocess.run(
-        [
-            "security",
-            "find-generic-password",
-            "-a",
-            username,
-            "-s",
-            KEYCHAIN_SERVICE,
-            "-w",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        return None
-
-    password = result.stdout.strip()
-    return password or None
 
 
 def _build_follow_up_prompt(question_type: str, gaps: list[str]) -> str:

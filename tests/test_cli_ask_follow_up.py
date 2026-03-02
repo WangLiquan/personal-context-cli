@@ -11,6 +11,7 @@ def _run_ask(
     monkeypatch,
     data_file: Path,
     question: str,
+    password: str = "pass123",
 ) -> tuple[int, str]:
     monkeypatch.setattr(
         "personal_context_cli.cli.sys.argv",
@@ -22,6 +23,8 @@ def _run_ask(
             "auto",
             "--data-file",
             str(data_file),
+            "--password",
+            password,
         ],
     )
     code = cli.main()
@@ -39,8 +42,6 @@ def test_ask_prompts_and_persists_context_note_when_context_missing(monkeypatch,
         captured["context"] = context
         return "mock-answer"
 
-    monkeypatch.setenv("PCTX_PASSWORD", "pass123")
-    monkeypatch.setattr("personal_context_cli.cli._read_password_from_keychain", lambda: None)
     monkeypatch.setattr("personal_context_cli.cli.generate_answer", fake_generate_answer)
     monkeypatch.setattr("personal_context_cli.cli.sys.stdin.isatty", lambda: True)
     monkeypatch.setattr("builtins.input", lambda _: "我的月收入 5w，风险偏好中等。")
@@ -83,8 +84,6 @@ def test_ask_skips_follow_up_when_context_is_already_sufficient_but_persists_que
     def fake_generate_answer(question: str, context: dict, **_: object) -> str:
         return "mock-answer"
 
-    monkeypatch.setenv("PCTX_PASSWORD", "pass123")
-    monkeypatch.setattr("personal_context_cli.cli._read_password_from_keychain", lambda: None)
     monkeypatch.setattr("personal_context_cli.cli.generate_answer", fake_generate_answer)
     monkeypatch.setattr("personal_context_cli.cli.sys.stdin.isatty", lambda: True)
 
@@ -115,8 +114,6 @@ def test_ask_extracts_mortgage_fact_into_profile_memory(monkeypatch, tmp_path, c
     def fake_generate_answer(question: str, context: dict, **_: object) -> str:
         return "mock-answer"
 
-    monkeypatch.setenv("PCTX_PASSWORD", "pass123")
-    monkeypatch.setattr("personal_context_cli.cli._read_password_from_keychain", lambda: None)
     monkeypatch.setattr("personal_context_cli.cli.generate_answer", fake_generate_answer)
     monkeypatch.setattr("personal_context_cli.cli.sys.stdin.isatty", lambda: False)
 

@@ -16,15 +16,7 @@ This workflow resets `profile.enc` to an empty encrypted payload, then requires 
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.3-beta"
 ```
 
-## Password Session (recommended)
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Ask for the current profile password and pass it with `--password`.
 
 ## Reinit Workflow
 
@@ -32,7 +24,8 @@ Ask for confirmation before running reset commands because this operation overwr
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 After reset, reconfigure profile, preferences, and family data with the init/profile workflows.

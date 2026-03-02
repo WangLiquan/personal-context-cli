@@ -16,15 +16,7 @@ It focuses on `context preview` and `ask` with provider control (`auto`, `codex`
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-beta"
 ```
 
-## Password Session (recommended)
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Ask the user for profile password once, then pass it with `--password`.
 
 ## Ask Workflow
 
@@ -36,7 +28,8 @@ Ask for the natural-language question only, then run commands directly.
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 2) Ask with provider relay
@@ -47,7 +40,8 @@ personal-context ask \
   --provider auto \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Provider Modes

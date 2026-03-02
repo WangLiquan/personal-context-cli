@@ -16,15 +16,7 @@ Do not rely on local wrapper scripts.
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-beta"
 ```
 
-## Password Session (recommended)
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Use one explicit password for the profile and pass it with `--password`.
 
 ## Core Workflows
 
@@ -32,7 +24,8 @@ export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-co
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 2) Maintain owner profile and preferences
@@ -40,12 +33,14 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --age 32 \
   --industry internet \
   --income-range 50-100w
 
 personal-context prefs set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
@@ -56,10 +51,12 @@ personal-context prefs set \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --relation spouse
 
 personal-context family list \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ### 4) Preview context and ask
@@ -69,14 +66,16 @@ For ask workflows, do not ask users to classify the question type or provide str
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 
 personal-context ask \
   "Should I increase my emergency fund?" \
   --provider auto \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Provider Modes
@@ -92,7 +91,7 @@ personal-context ask \
 - relay timeout:
   - Increase `--relay-timeout-seconds` to 45 or 60.
 - decrypt failure:
-  - Verify `PCTX_PASSWORD` and `--data-file` pair.
+  - Verify `--password` and `--data-file` pair.
 
 ## Verification
 

@@ -32,7 +32,7 @@ def test_init_creates_encrypted_store(tmp_path: Path) -> None:
     assert (tmp_path / "profile.enc").exists()
 
 
-def test_profile_get_uses_password_from_env(tmp_path: Path) -> None:
+def test_profile_get_with_explicit_password_roundtrip(tmp_path: Path) -> None:
     data_file = tmp_path / "profile.enc"
     init_result = subprocess.run(
         [
@@ -51,8 +51,6 @@ def test_profile_get_uses_password_from_env(tmp_path: Path) -> None:
     )
     assert init_result.returncode == 0, init_result.stderr
 
-    env = _pythonpath_env()
-    env["PCTX_PASSWORD"] = "pass123"
     set_result = subprocess.run(
         [
             sys.executable,
@@ -62,6 +60,8 @@ def test_profile_get_uses_password_from_env(tmp_path: Path) -> None:
             "set",
             "--data-file",
             str(data_file),
+            "--password",
+            "pass123",
             "--age",
             "32",
             "--industry",
@@ -71,7 +71,7 @@ def test_profile_get_uses_password_from_env(tmp_path: Path) -> None:
         ],
         capture_output=True,
         text=True,
-        env=env,
+        env=_pythonpath_env(),
     )
     assert set_result.returncode == 0, set_result.stderr
 
@@ -84,16 +84,18 @@ def test_profile_get_uses_password_from_env(tmp_path: Path) -> None:
             "get",
             "--data-file",
             str(data_file),
+            "--password",
+            "pass123",
         ],
         capture_output=True,
         text=True,
-        env=env,
+        env=_pythonpath_env(),
     )
     assert get_result.returncode == 0, get_result.stderr
     assert "internet" in get_result.stdout
 
 
-def test_profile_get_requires_password_or_env(tmp_path: Path) -> None:
+def test_profile_get_requires_password_in_non_interactive_mode(tmp_path: Path) -> None:
     data_file = tmp_path / "profile.enc"
     init_result = subprocess.run(
         [
@@ -112,8 +114,6 @@ def test_profile_get_requires_password_or_env(tmp_path: Path) -> None:
     )
     assert init_result.returncode == 0, init_result.stderr
 
-    env = _pythonpath_env()
-    env.pop("PCTX_PASSWORD", None)
     get_result = subprocess.run(
         [
             sys.executable,
@@ -126,7 +126,7 @@ def test_profile_get_requires_password_or_env(tmp_path: Path) -> None:
         ],
         capture_output=True,
         text=True,
-        env=env,
+        env=_pythonpath_env(),
     )
     assert get_result.returncode != 0
-    assert "Use --password, set PCTX_PASSWORD, or configure macOS Keychain" in get_result.stderr
+    assert "Password not provided. Use --password or run in interactive mode." in get_result.stderr

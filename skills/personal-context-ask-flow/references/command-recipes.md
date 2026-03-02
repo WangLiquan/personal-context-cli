@@ -1,21 +1,14 @@
 # Ask Flow Recipes
 
-## Session Password
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Use one explicit password and pass it with `--password`.
 
 ## Context Preview
 
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Ask with Auto Relay
@@ -26,7 +19,8 @@ personal-context ask \
   --provider auto \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Force Provider
@@ -37,12 +31,14 @@ personal-context ask "question" \
   --provider codex \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 
 # Force claude relay
 personal-context ask "question" \
   --provider claude \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```

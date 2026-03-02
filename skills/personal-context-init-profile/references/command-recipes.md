@@ -2,21 +2,14 @@
 
 When guiding users through init, always request a custom password input and do not provide a default-password choice.
 
-## Session Password
-
-```bash
-# write once to macOS Keychain
-security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
-
-# load into current shell session
-export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
-```
+Use one explicit password and pass it with `--password`.
 
 ## Bootstrap
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```
 
 ## Owner Profile
@@ -24,6 +17,7 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --age 32 \
   --industry internet \
   --income-range 50-100w
@@ -34,6 +28,7 @@ personal-context profile set \
 ```bash
 personal-context prefs set \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
@@ -44,8 +39,10 @@ personal-context prefs set \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>" \
   --relation spouse
 
 personal-context family list \
-  --data-file ./profile.enc
+  --data-file ./profile.enc \
+  --password "<YOUR_PASSWORD>"
 ```

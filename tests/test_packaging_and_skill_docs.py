@@ -52,7 +52,7 @@ def test_ask_flow_docs_do_not_require_type_flag() -> None:
         assert "--type" not in content
 
 
-def test_skill_docs_recommend_session_password_env() -> None:
+def test_skill_docs_use_explicit_password_examples() -> None:
     skill_docs = [
         Path("skills/personal-context-cli-workflow/SKILL.md"),
         Path("skills/personal-context-init-profile/SKILL.md"),
@@ -61,20 +61,20 @@ def test_skill_docs_recommend_session_password_env() -> None:
     ]
     for doc in skill_docs:
         content = doc.read_text(encoding="utf-8")
-        assert "PCTX_PASSWORD" in content
-        assert "security add-generic-password" in content
+        assert "--password" in content
+        assert "PCTX_PASSWORD" not in content
 
 
-def test_readme_documents_keychain_password_setup() -> None:
+def test_readme_documents_explicit_password_usage() -> None:
     content = Path("README.md").read_text(encoding="utf-8")
-    assert "security add-generic-password" in content
-    assert "security find-generic-password" in content
+    assert "--password" in content
+    assert "PCTX_PASSWORD" not in content
 
 
-def test_chinese_readme_exists_and_documents_keychain_password_setup() -> None:
+def test_chinese_readme_documents_explicit_password_usage() -> None:
     content = Path("README.zh-CN.md").read_text(encoding="utf-8")
-    assert "security add-generic-password" in content
-    assert "security find-generic-password" in content
+    assert "--password" in content
+    assert "PCTX_PASSWORD" not in content
     assert "personal-context-reinit" in content
 
 

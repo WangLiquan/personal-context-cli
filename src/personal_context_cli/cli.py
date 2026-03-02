@@ -1,5 +1,8 @@
 import argparse
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 from .config import DEFAULT_PROFILE_PAYLOAD
@@ -17,10 +20,66 @@ from .services import (
 )
 from .store import EncryptedStore
 
+PASSWORD_ENV_VAR = "PCTX_PASSWORD"
+KEYCHAIN_SERVICE = "personal-context-cli"
+
 
 def _add_data_password_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--data-file", required=True)
-    parser.add_argument("--password", required=True)
+    parser.add_argument(
+        "--password",
+        required=False,
+        help=f"Encryption password. If omitted, uses ${PASSWORD_ENV_VAR}.",
+    )
+
+
+def _resolve_password(args: argparse.Namespace, parser: argparse.ArgumentParser) -> str:
+    password = getattr(args, "password", None)
+    if password:
+        return password
+
+    env_password = os.getenv(PASSWORD_ENV_VAR)
+    if env_password:
+        return env_password
+
+    keychain_password = _read_password_from_keychain()
+    if keychain_password:
+        return keychain_password
+
+    parser.error(
+        f"Password not provided. Use --password, set {PASSWORD_ENV_VAR}, or configure macOS Keychain."
+    )
+    raise RuntimeError("unreachable")
+
+
+def _read_password_from_keychain() -> str | None:
+    if os.getenv("PCTX_DISABLE_KEYCHAIN") == "1":
+        return None
+    if sys.platform != "darwin":
+        return None
+
+    username = os.getenv("USER")
+    if not username:
+        return None
+
+    result = subprocess.run(
+        [
+            "security",
+            "find-generic-password",
+            "-a",
+            username,
+            "-s",
+            KEYCHAIN_SERVICE,
+            "-w",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+
+    password = result.stdout.strip()
+    return password or None
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -115,42 +174,45 @@ def _handle_init(data_file: str, password: str) -> int:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    password = None
+    if hasattr(args, "data_file"):
+        password = _resolve_password(args, parser)
 
     if args.command == "init":
-        return _handle_init(args.data_file, args.password)
+        return _handle_init(args.data_file, password)
     if args.command == "profile":
         if args.profile_command == "set":
             set_owner_profile(
                 data_file=args.data_file,
-                password=args.password,
+                password=password,
                 age=args.age,
                 industry=args.industry,
                 income_range=args.income_range,
             )
             return 0
         if args.profile_command == "get":
-            profile = get_owner_profile(args.data_file, args.password)
+            profile = get_owner_profile(args.data_file, password)
             print(json.dumps(profile, ensure_ascii=False))
             return 0
     if args.command == "prefs":
         if args.prefs_command == "set":
             set_preferences(
                 data_file=args.data_file,
-                password=args.password,
+                password=password,
                 response_style=args.response_style,
                 strategy_style=args.strategy_style,
                 locale_bias=args.locale_bias,
             )
             return 0
         if args.prefs_command == "get":
-            prefs = get_preferences(args.data_file, args.password)
+            prefs = get_preferences(args.data_file, password)
             print(json.dumps(prefs, ensure_ascii=False))
             return 0
     if args.command == "family":
         if args.family_command == "add":
             member = add_family_member(
                 data_file=args.data_file,
-                password=args.password,
+                password=password,
                 relation=args.relation,
                 age_band=args.age_band,
                 occupation_or_school=args.occupation_or_school,
@@ -158,13 +220,13 @@ def main() -> int:
             print(json.dumps(member, ensure_ascii=False))
             return 0
         if args.family_command == "list":
-            members = list_family_members(args.data_file, args.password)
+            members = list_family_members(args.data_file, password)
             print(json.dumps(members, ensure_ascii=False))
             return 0
         if args.family_command == "update":
             updated = update_family_member(
                 data_file=args.data_file,
-                password=args.password,
+                password=password,
                 member_id=args.id,
                 relation=args.relation,
                 age_band=args.age_band,
@@ -174,18 +236,18 @@ def main() -> int:
         if args.family_command == "remove":
             removed = remove_family_member(
                 data_file=args.data_file,
-                password=args.password,
+                password=password,
                 member_id=args.id,
             )
             return 0 if removed else 1
     if args.command == "context":
         if args.context_command == "preview":
-            payload = EncryptedStore(Path(args.data_file)).load(args.password)
+            payload = EncryptedStore(Path(args.data_file)).load(password)
             context = select_context(args.question, args.type, payload)
             print(json.dumps(context, ensure_ascii=False))
             return 0
     if args.command == "ask":
-        payload = EncryptedStore(Path(args.data_file)).load(args.password)
+        payload = EncryptedStore(Path(args.data_file)).load(password)
         context = select_context(args.question, args.type, payload)
         answer = generate_answer(
             args.question,

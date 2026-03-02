@@ -1,11 +1,20 @@
 # Init and Profile Recipes
 
+## Session Password
+
+```bash
+# write once to macOS Keychain
+security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
+
+# load into current shell session
+export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
+```
+
 ## Bootstrap
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ## Owner Profile
@@ -13,7 +22,6 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
-  --password pass123 \
   --age 32 \
   --industry internet \
   --income-range 50-100w
@@ -24,7 +32,6 @@ personal-context profile set \
 ```bash
 personal-context prefs set \
   --data-file ./profile.enc \
-  --password pass123 \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
@@ -35,10 +42,8 @@ personal-context prefs set \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
-  --password pass123 \
   --relation spouse
 
 personal-context family list \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```

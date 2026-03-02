@@ -16,14 +16,23 @@ Do not rely on local wrapper scripts.
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-beta"
 ```
 
+## Password Session (recommended)
+
+```bash
+# write once to macOS Keychain
+security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
+
+# load into current shell session
+export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
+```
+
 ## Core Workflows
 
 ### 1) Initialize encrypted store
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ### 2) Maintain owner profile and preferences
@@ -31,14 +40,12 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
-  --password pass123 \
   --age 32 \
   --industry internet \
   --income-range 50-100w
 
 personal-context prefs set \
   --data-file ./profile.enc \
-  --password pass123 \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
@@ -49,12 +56,10 @@ personal-context prefs set \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
-  --password pass123 \
   --relation spouse
 
 personal-context family list \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ### 4) Preview context and ask
@@ -63,8 +68,7 @@ personal-context family list \
 personal-context context preview \
   "Should I increase my emergency fund?" \
   --type finance \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 
 personal-context ask \
   "Should I increase my emergency fund?" \
@@ -72,8 +76,7 @@ personal-context ask \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
   --type finance \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ## Provider Modes
@@ -88,8 +91,8 @@ personal-context ask \
   - Ensure `pipx` bin path is in `PATH`.
 - relay timeout:
   - Increase `--relay-timeout-seconds` to 45 or 60.
-- wrong password or decrypt failure:
-  - Verify `--password` and `--data-file` pair.
+- decrypt failure:
+  - Verify `PCTX_PASSWORD` and `--data-file` pair.
 
 ## Verification
 

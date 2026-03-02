@@ -9,11 +9,22 @@ description: Use when initializing encrypted personal context storage or updatin
 
 Use this skill for onboarding and profile maintenance.
 All commands use the installed `personal-context` CLI directly.
+Ask the user for a password before running any init/profile command.
 
 ## One-Time Install
 
 ```bash
 pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-beta"
+```
+
+## Password Session (recommended)
+
+```bash
+# write once to macOS Keychain
+security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
+
+# load into current shell session
+export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
 ```
 
 ## Core Commands
@@ -22,8 +33,7 @@ pipx install "git+https://github.com/WangLiquan/personal-context-cli.git@v0.1.1-
 
 ```bash
 personal-context init \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ### 2) Owner profile
@@ -31,14 +41,12 @@ personal-context init \
 ```bash
 personal-context profile set \
   --data-file ./profile.enc \
-  --password pass123 \
   --age 32 \
   --industry internet \
   --income-range 50-100w
 
 personal-context profile get \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ### 3) Preferences
@@ -46,14 +54,12 @@ personal-context profile get \
 ```bash
 personal-context prefs set \
   --data-file ./profile.enc \
-  --password pass123 \
   --response-style brief \
   --strategy-style balanced \
   --locale-bias CN-first
 
 personal-context prefs get \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ### 4) Family records
@@ -61,14 +67,12 @@ personal-context prefs get \
 ```bash
 personal-context family add \
   --data-file ./profile.enc \
-  --password pass123 \
   --relation spouse \
   --age-band 30-39 \
   --occupation-or-school "product manager"
 
 personal-context family list \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ## Verification

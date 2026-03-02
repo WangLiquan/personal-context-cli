@@ -23,30 +23,44 @@ Then call skills by name directly in OpenX/Claude Code:
 - `personal-context-init-profile`
 - `personal-context-ask-flow`
 
+## Password Setup (recommended)
+
+```bash
+# write once to macOS Keychain
+security add-generic-password -a "$USER" -s personal-context-cli -w "your-strong-password" -U
+
+# load into current shell session
+export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
+```
+
+Optional: add this line to `~/.zshrc` for auto-load on new terminals.
+
+```bash
+export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-context-cli -w 2>/dev/null)"
+```
+
+All subsequent commands can omit `--password`.
+
 ## Core Commands
 
 ```bash
 # initialize encrypted store
 personal-context init \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 
 # set and get profile
 personal-context profile set \
   --data-file ./profile.enc \
-  --password pass123 \
   --age 32 --industry internet --income-range 50-100w
 
 personal-context profile get \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 
 # selective context preview
 personal-context context preview \
   "Should I increase my emergency fund?" \
   --type finance \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 
 # ask with host-auth relay (no project API key)
 personal-context ask \
@@ -55,8 +69,7 @@ personal-context ask \
   --relay-timeout-seconds 45 \
   --relay-retries 1 \
   --type finance \
-  --data-file ./profile.enc \
-  --password pass123
+  --data-file ./profile.enc
 ```
 
 ## Provider Modes
@@ -69,6 +82,7 @@ personal-context ask \
 
 - Data is encrypted at rest before writing to disk.
 - Real data files (`*.enc`) and `.env` are ignored by git.
+- Password can be passed via `--password` or session env `PCTX_PASSWORD`.
 - This repository should store code and templates only.
 
 ## Development

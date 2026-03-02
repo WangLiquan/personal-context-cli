@@ -39,3 +39,26 @@ def test_ask_flow_skill_no_api_provider_mentions() -> None:
         content = file.read_text(encoding="utf-8").lower()
         assert "provider api" not in content
         assert "--provider api" not in content
+
+
+def test_skill_docs_recommend_session_password_env() -> None:
+    skill_docs = [
+        Path("skills/personal-context-cli-workflow/SKILL.md"),
+        Path("skills/personal-context-init-profile/SKILL.md"),
+        Path("skills/personal-context-ask-flow/SKILL.md"),
+    ]
+    for doc in skill_docs:
+        content = doc.read_text(encoding="utf-8")
+        assert "PCTX_PASSWORD" in content
+        assert "security add-generic-password" in content
+
+
+def test_readme_documents_keychain_password_setup() -> None:
+    content = Path("README.md").read_text(encoding="utf-8")
+    assert "security add-generic-password" in content
+    assert "security find-generic-password" in content
+
+
+def test_init_skill_requests_password_first() -> None:
+    content = Path("skills/personal-context-init-profile/SKILL.md").read_text(encoding="utf-8")
+    assert "Ask the user for a password before running any init/profile command." in content

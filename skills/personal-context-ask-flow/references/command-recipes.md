@@ -15,7 +15,6 @@ export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-co
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --type finance \
   --data-file ./profile.enc
 ```
 

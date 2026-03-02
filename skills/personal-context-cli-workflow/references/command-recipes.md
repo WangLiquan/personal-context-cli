@@ -53,7 +53,6 @@ personal-context family list \
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --type finance \
   --data-file ./profile.enc
 
 personal-context ask \

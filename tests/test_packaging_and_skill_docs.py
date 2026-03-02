@@ -41,6 +41,16 @@ def test_ask_flow_skill_no_api_provider_mentions() -> None:
         assert "--provider api" not in content
 
 
+def test_ask_flow_docs_do_not_require_type_flag() -> None:
+    files = [
+        Path("skills/personal-context-ask-flow/SKILL.md"),
+        Path("skills/personal-context-ask-flow/references/command-recipes.md"),
+    ]
+    for file in files:
+        content = file.read_text(encoding="utf-8")
+        assert "--type" not in content
+
+
 def test_skill_docs_recommend_session_password_env() -> None:
     skill_docs = [
         Path("skills/personal-context-cli-workflow/SKILL.md"),

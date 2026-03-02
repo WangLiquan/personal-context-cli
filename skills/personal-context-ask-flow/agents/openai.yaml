@@ -1,4 +1,4 @@
 version: 1
 display_name: Personal Context Ask Flow
 short_description: Run selective context preview and ask with relay providers.
-default_prompt: Use the ask-flow skill to run context preview and ask with provider mode auto, codex, or claude.
+default_prompt: Use the ask-flow skill to run context preview and ask with provider mode auto, codex, or claude. Never ask the user to provide question type labels or structured type parameters.

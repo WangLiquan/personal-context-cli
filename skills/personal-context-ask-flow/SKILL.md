@@ -28,12 +28,14 @@ export PCTX_PASSWORD="$(security find-generic-password -a "$USER" -s personal-co
 
 ## Ask Workflow
 
-### 1) Preview selected context
+Do not ask the user for question type or structured parameters.
+Ask for the natural-language question only, then run commands directly.
+
+### 1) Preview selected context (optional)
 
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --type finance \
   --data-file ./profile.enc
 ```
 

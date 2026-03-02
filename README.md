@@ -59,7 +59,6 @@ personal-context profile get \
 # selective context preview
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --type finance \
   --data-file ./profile.enc
 
 # ask with host-auth relay (no project API key)

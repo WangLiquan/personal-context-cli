@@ -64,10 +64,11 @@ personal-context family list \
 
 ### 4) Preview context and ask
 
+For ask workflows, do not ask users to classify the question type or provide structured type parameters.
+
 ```bash
 personal-context context preview \
   "Should I increase my emergency fund?" \
-  --type finance \
   --data-file ./profile.enc
 
 personal-context ask \

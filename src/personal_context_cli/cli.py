@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from .config import DEFAULT_PROFILE_PAYLOAD
+from .context_selector import select_context
 from .services import (
     add_family_member,
     get_owner_profile,
@@ -29,6 +30,13 @@ def build_parser() -> argparse.ArgumentParser:
     _add_data_password_args(init_parser)
 
     subcommands.add_parser("ask")
+
+    context_parser = subcommands.add_parser("context")
+    context_sub = context_parser.add_subparsers(dest="context_command")
+    context_preview = context_sub.add_parser("preview")
+    context_preview.add_argument("question")
+    context_preview.add_argument("--type")
+    _add_data_password_args(context_preview)
 
     profile_parser = subcommands.add_parser("profile")
     profile_sub = profile_parser.add_subparsers(dest="profile_command")
@@ -149,5 +157,11 @@ def main() -> int:
                 member_id=args.id,
             )
             return 0 if removed else 1
+    if args.command == "context":
+        if args.context_command == "preview":
+            payload = EncryptedStore(Path(args.data_file)).load(args.password)
+            context = select_context(args.question, args.type, payload)
+            print(json.dumps(context, ensure_ascii=False))
+            return 0
 
     return 0

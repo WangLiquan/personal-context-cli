@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from .config import DEFAULT_PROFILE_PAYLOAD
-from .context_selector import select_context
+from .context_selector import detect_question_type, find_context_gaps, select_context
 from .llm_adapter import generate_answer
 from .services import (
     add_family_member,
@@ -80,6 +80,36 @@ def _read_password_from_keychain() -> str | None:
 
     password = result.stdout.strip()
     return password or None
+
+
+def _build_follow_up_prompt(question_type: str, gaps: list[str]) -> str:
+    gap_labels = {
+        "finance_background": "财务背景（收入区间、风险偏好、目标）",
+        "career_background": "职业背景（行业、当前阶段）",
+        "education_background": "教育相关背景（家庭成员学校/学习情况）",
+        "family_background": "家庭背景（家庭成员或关系信息）",
+        "general_background": "个人背景信息",
+    }
+    missing = ", ".join(gap_labels.get(gap, gap) for gap in gaps)
+    return (
+        f"检测到当前问题（{question_type}）缺少上下文：{missing}。"
+        "请补充一段相关信息（会加密保存到本地，回车可跳过）： "
+    )
+
+
+def _append_context_note(payload: dict, question: str, question_type: str, note: str) -> dict:
+    notes = payload.get("context_notes", [])
+    if not isinstance(notes, list):
+        notes = []
+    notes.append(
+        {
+            "question": question,
+            "question_type": question_type,
+            "note": note,
+        }
+    )
+    payload["context_notes"] = notes
+    return payload
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -247,7 +277,17 @@ def main() -> int:
             print(json.dumps(context, ensure_ascii=False))
             return 0
     if args.command == "ask":
-        payload = EncryptedStore(Path(args.data_file)).load(password)
+        store = EncryptedStore(Path(args.data_file))
+        payload = store.load(password)
+        resolved_type = detect_question_type(args.question, args.type)
+        context_gaps = find_context_gaps(args.question, args.type, payload)
+
+        if context_gaps and sys.stdin.isatty():
+            note = input(_build_follow_up_prompt(resolved_type, context_gaps)).strip()
+            if note:
+                payload = _append_context_note(payload, args.question, resolved_type, note)
+                store.save(payload, password)
+
         context = select_context(args.question, args.type, payload)
         answer = generate_answer(
             args.question,

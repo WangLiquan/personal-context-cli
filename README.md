@@ -54,3 +54,15 @@ PYTHONPATH=src .venv/bin/python -m personal_context_cli ask \
 ```bash
 PYTHONPATH=src .venv/bin/pytest -v
 ```
+
+## Agent Skill
+
+This repository includes an agent skill:
+
+- `skills/personal-context-cli-workflow/`
+
+Use the bundled wrapper script to avoid repeating runtime setup:
+
+```bash
+./skills/personal-context-cli-workflow/scripts/pctx.sh --help
+```

@@ -35,8 +35,20 @@ def build_parser() -> argparse.ArgumentParser:
     ask_parser.add_argument("--type")
     ask_parser.add_argument(
         "--provider",
-        choices=["auto", "codex", "claude", "api"],
+        choices=["auto", "codex", "claude"],
         default="auto",
+    )
+    ask_parser.add_argument(
+        "--relay-timeout-seconds",
+        type=int,
+        default=20,
+        help="Timeout for codex/claude relay providers in seconds.",
+    )
+    ask_parser.add_argument(
+        "--relay-retries",
+        type=int,
+        default=0,
+        help="Retry count for relay timeout failures.",
     )
     _add_data_password_args(ask_parser)
 
@@ -175,7 +187,13 @@ def main() -> int:
     if args.command == "ask":
         payload = EncryptedStore(Path(args.data_file)).load(args.password)
         context = select_context(args.question, args.type, payload)
-        answer = generate_answer(args.question, context, provider=args.provider)
+        answer = generate_answer(
+            args.question,
+            context,
+            provider=args.provider,
+            relay_timeout_seconds=args.relay_timeout_seconds,
+            relay_retries=args.relay_retries,
+        )
         print(answer)
         return 0
 

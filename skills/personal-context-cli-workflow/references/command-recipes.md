@@ -54,9 +54,11 @@ Expected:
 
 ./skills/personal-context-cli-workflow/scripts/pctx.sh ask \
   "Should I increase my emergency fund?" \
+  --provider auto \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
 ```
 
-Without `OPENAI_API_KEY`, `ask` prints fallback text containing selected context.
+`--provider auto` uses external logged-in CLI credentials from `codex` or `claude`.
+Use `--provider api` only when you want explicit key-based behavior.

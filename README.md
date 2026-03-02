@@ -38,6 +38,7 @@ PYTHONPATH=src .venv/bin/python -m personal_context_cli context preview \
 # ask with fallback (when no OPENAI_API_KEY)
 PYTHONPATH=src .venv/bin/python -m personal_context_cli ask \
   "Should I increase my emergency fund?" \
+  --provider auto \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
@@ -66,3 +67,8 @@ Use the bundled wrapper script to avoid repeating runtime setup:
 ```bash
 ./skills/personal-context-cli-workflow/scripts/pctx.sh --help
 ```
+
+`ask` provider modes:
+- `auto` (default): use logged-in `codex`/`claude` CLI credentials
+- `codex` / `claude`: force specific relay provider
+- `api`: use `OPENAI_API_KEY`

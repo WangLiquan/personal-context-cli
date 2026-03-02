@@ -87,6 +87,7 @@ PCTX_PROJECT_ROOT=/Users/wangliquan/Desktop/personal-context-cli \
 
 ./skills/personal-context-cli-workflow/scripts/pctx.sh ask \
   "Should I increase my emergency fund?" \
+  --provider auto \
   --type finance \
   --data-file ./profile.enc \
   --password pass123
@@ -94,8 +95,10 @@ PCTX_PROJECT_ROOT=/Users/wangliquan/Desktop/personal-context-cli \
 
 ## Fallback Behavior
 
-- If `OPENAI_API_KEY` is not set, `ask` returns a fallback response that includes selected context.
-- If `OPENAI_API_KEY` is set, `ask` uses provider logic from `src/personal_context_cli/llm_adapter.py`.
+- `ask` supports `--provider auto|codex|claude|api`.
+- Default is `--provider auto`, which uses external logged-in CLI (`codex` first, then `claude`).
+- `--provider api` uses `OPENAI_API_KEY` path.
+- If provider execution is unavailable, fallback includes selected context.
 
 ## Verification
 

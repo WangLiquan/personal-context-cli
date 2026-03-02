@@ -1,0 +1,4 @@
+version: 1
+display_name: Personal Context CLI Workflow
+short_description: Run and operate the personal-context-cli commands quickly.
+default_prompt: Use the personal context CLI workflow to initialize encrypted store, manage profile or family data, preview selected context, and run ask with fallback handling.

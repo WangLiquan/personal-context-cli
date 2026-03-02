@@ -1,0 +1,32 @@
+{
+  "owner_profile": {
+    "age": 32,
+    "industry": "internet",
+    "income_range": "50-100w",
+    "risk_preference": "balanced",
+    "goals": [
+      "build emergency fund",
+      "retirement planning"
+    ]
+  },
+  "family_members": [
+    {
+      "id": "member-001",
+      "relation": "spouse",
+      "age_band": "30-39",
+      "occupation_or_school": "product manager",
+      "focus_areas": [
+        "education",
+        "health"
+      ],
+      "shared_financial_responsibilities": [
+        "mortgage"
+      ]
+    }
+  ],
+  "preferences": {
+    "response_style": "brief",
+    "strategy_style": "balanced",
+    "locale_bias": "CN-first"
+  }
+}
